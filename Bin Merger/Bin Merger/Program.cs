@@ -45,24 +45,43 @@ namespace Bin_Merger
 
             Console.WriteLine("Comparing Checksums and Replacing...");
 
-            Console.WriteLine(CalculateMD5(Path.GetFullPath(path)));
+
             //In Hind Sight this entire part looks stupid but it works
-            for(int i = 0; i < originalFiles.Count; i++)
+
+            ArrayList changed = new ArrayList();
+
+
+            for (int i = 0; i < originalFiles.Count; i++)
             {
+
+                Array ogFileArray = listFilesRecursivly(originalFiles[i].ToString());
                 for(int k = 0; k< modFiles.Count; k++)
                 {
                     
                     string compare = Directory.GetParent(modFiles[k].ToString()).ToString();
                     if (String.Equals(  Path.GetFileName(compare)  ,Path.GetFileName(originalFiles[i].ToString()) ))
                     {
-                        Console.WriteLine("IT WORKED");
+                        
+                        string[] ogDirectory =  listFilesRecursivly(originalFiles[i].ToString());
+                        string[] modDirectory = listFilesRecursivly(modFiles[k].ToString());
+                        for (int l = 0; l < ogDirectory.Length; l++)
+                        {
+                            
+                            
+                            if(!String.Equals ( CalculateMD5(ogDirectory[l]),CalculateMD5(modDirectory[l]) ))
+                            {
+                                Console.WriteLine("Not the same!: " + modDirectory[l]);
+                                Console.WriteLine(CalculateMD5(ogDirectory[l]));
+                                Console.WriteLine(CalculateMD5(modDirectory[l]));
+                                
+                            }
+                        }
                     }
+                    Console.WriteLine("Medium Loop");
                 }
+                Console.WriteLine("Big Loop");
             }
 
-
-            //string test = "";
-            Console.WriteLine("THIS IS A TEST VERSION");
 
             //Process.Start("CMD.exe","/K "+ addQoutes(Path.GetFullPath(path)) );
         }
@@ -122,7 +141,7 @@ namespace Bin_Merger
         }
         
         
-        static Array listFilesRecursivly(string directory)
+        static string[] listFilesRecursivly(string directory)
         {
 
             string[] filePaths = Directory.GetFiles(directory, "",
@@ -133,9 +152,14 @@ namespace Bin_Merger
         static string CalculateMD5(string filename)
         {
             using var md5 = MD5.Create();
-            using var stream = File.OpenRead(filename);
-            var hash = md5.ComputeHash(stream);
-            return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToLower();
+            {
+                using var stream = File.OpenRead(filename);
+                {
+                    var hash = md5.ComputeHash(stream);
+                    stream.Close();
+                    return BitConverter.ToString(hash).Replace("-", String.Empty).ToLower();
+                }
+            }
         }
 
 
