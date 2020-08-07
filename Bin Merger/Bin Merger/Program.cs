@@ -62,7 +62,7 @@ namespace Bin_Merger
 
 
             //string test = "";
-
+            Console.WriteLine("THIS IS A TEST VERSION");
 
             //Process.Start("CMD.exe","/K "+ addQoutes(Path.GetFullPath(path)) );
         }
