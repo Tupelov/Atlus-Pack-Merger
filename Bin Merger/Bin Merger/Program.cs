@@ -27,11 +27,12 @@ namespace Bin_Merger
 
             int modFileAmount = 0;
             ArrayList modFiles = new ArrayList();
+            //Finds mods files by using original directory and swapping ORIGInal with MODDING
             for(int i = 0; i < originalFiles.Count; i++)
             {
                 string temp = originalFiles[i].ToString();
                 temp = temp.Replace("ORIGINAL", "MODDED");
-                //Console.WriteLine(temp);
+                
                 String[] templist = Directory.GetDirectories(temp);
 
                 for (i=0; i< Directory.GetDirectories(temp).Length;i++ )
@@ -50,7 +51,7 @@ namespace Bin_Merger
 
             ArrayList changed = new ArrayList();
 
-
+            //Goes and iterates through the mod files and original files and compares checksums add those that are replaced to changed array for comparison
             for (int i = 0; i < originalFiles.Count; i++)
             {
 
@@ -66,24 +67,40 @@ namespace Bin_Merger
                         string[] modDirectory = listFilesRecursivly(modFiles[k].ToString());
                         for (int l = 0; l < ogDirectory.Length; l++)
                         {
-                            
-                            
-                            if(!String.Equals ( CalculateMD5(ogDirectory[l]),CalculateMD5(modDirectory[l]) ))
-                            {
-                                Console.WriteLine("Not the same!: " + modDirectory[l]);
-                                Console.WriteLine(CalculateMD5(ogDirectory[l]));
-                                Console.WriteLine(CalculateMD5(modDirectory[l]));
+
+                            if (changed.Contains(CalculateMD5(ogDirectory[l]))){
                                 
                             }
+                            else if(!String.Equals ( CalculateMD5(ogDirectory[l]),CalculateMD5(modDirectory[l]) ))
+                            {
+                                //Console.WriteLine("Not the same!: " + modDirectory[l]);
+                                //Console.WriteLine(CalculateMD5(ogDirectory[l]));
+                                //Console.WriteLine(CalculateMD5(modDirectory[l]));
+                                changed.Add(CalculateMD5(ogDirectory[l]));
+                                //Need to make this part work and were done
+                                File.Delete(ogDirectory[l]);
+                                File.Move(modDirectory[i], ogDirectory[l] );
+                                
+                            }
+                            //Console.WriteLine("Break dont work");
                         }
+                 
                     }
-                    Console.WriteLine("Medium Loop");
+                   // Console.WriteLine("Medium Loop");
                 }
-                Console.WriteLine("Big Loop");
+               // Console.WriteLine("Big Loop");
             }
 
 
-            //Process.Start("CMD.exe","/K "+ addQoutes(Path.GetFullPath(path)) );
+            Console.WriteLine("Select your packed file version (v1; v2; v2be; v3; v3be)");
+
+            String ver = Console.ReadLine();
+            for (int i = 0; i < originalFiles.Count; i++) {
+                String type = Path.GetFileName(Directory.GetParent(originalFiles[i].ToString()).ToString());
+                Process.Start("CMD.exe", "/K " + addQoutes(Path.GetFullPath(path)) + " pack " + originalFiles[i]+" "+ver+" "+originalFiles[i]+"."+type);
+            }
+
+            Console.WriteLine("Done Merging!");
         }
 
         //Adds Quotes to A Given String (Good for Commands)
