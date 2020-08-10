@@ -13,94 +13,123 @@ namespace Bin_Merger
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Starting Bin Merger");
 
-            String path = "./PAKPack.exe";
-
-            int ogAmount = 0;
-            String original = Path.GetFullPath("./ORIGINAL");
-            ArrayList originalFiles = getOrginal(original);
-
-
-
-            Console.WriteLine("Looking For Mod Files...");
-
-            int modFileAmount = 0;
-            ArrayList modFiles = new ArrayList();
-            //Finds mods files by using original directory and swapping ORIGInal with MODDING
-            for(int i = 0; i < originalFiles.Count; i++)
+            try
             {
-                string temp = originalFiles[i].ToString();
-                temp = temp.Replace("ORIGINAL", "MODDED");
-                
-                String[] templist = Directory.GetDirectories(temp);
+                Console.WriteLine("Starting Bin Merger");
 
-                for (i=0; i< Directory.GetDirectories(temp).Length;i++ )
+                String path = "./PAKPack.exe";
+
+
+                String original = Path.GetFullPath("./ORIGINAL");
+                ArrayList originalFiles = getOrginal(original);
+
+
+
+                Console.WriteLine("Looking For Mod Files...");
+
+                int modFileAmount = 0;
+                ArrayList modFiles = new ArrayList();
+                //Finds mods files by using original directory and swapping ORIGInal with MODDING
+                for (int i = 0; i < originalFiles.Count; i++)
                 {
-                    modFiles.Add(templist[i]);
-                    modFileAmount++;
-                }
-            }
+                    string temp = originalFiles[i].ToString();
+                    temp = temp.Replace("ORIGINAL", "MODDED");
 
-            Console.WriteLine("Found: " + modFileAmount);
+                    String[] templist = Directory.GetDirectories(temp);
 
-            Console.WriteLine("Comparing Checksums and Replacing...");
-
-
-            //In Hind Sight this entire part looks stupid but it works
-
-            ArrayList changed = new ArrayList();
-
-            //Goes and iterates through the mod files and original files and compares checksums add those that are replaced to changed array for comparison
-            for (int i = 0; i < originalFiles.Count; i++)
-            {
-
-                Array ogFileArray = listFilesRecursivly(originalFiles[i].ToString());
-                for(int k = 0; k< modFiles.Count; k++)
-                {
-                    
-                    string compare = Directory.GetParent(modFiles[k].ToString()).ToString();
-                    if (String.Equals(  Path.GetFileName(compare)  ,Path.GetFileName(originalFiles[i].ToString()) ))
+                    for (i = 0; i < Directory.GetDirectories(temp).Length; i++)
                     {
-                        
-                        string[] ogDirectory =  listFilesRecursivly(originalFiles[i].ToString());
-                        string[] modDirectory = listFilesRecursivly(modFiles[k].ToString());
-                        for (int l = 0; l < ogDirectory.Length; l++)
+                        modFiles.Add(templist[i]);
+                        modFileAmount++;
+                    }
+                }
+
+                Console.WriteLine("Found: " + modFileAmount);
+
+                Console.WriteLine("Comparing Checksums and Replacing...");
+
+
+                //In Hind Sight this entire part looks stupid but it works
+
+                ArrayList changed = new ArrayList();
+
+                //Goes and iterates through the mod files and original files and compares checksums add those that are replaced to changed array for comparison
+                /*
+                for (int i = (originalFiles.Count - 1); i >= 0; i--)
+                {
+
+                    Array ogFileArray = listFilesRecursivly(originalFiles[i].ToString());
+                    for (int k = modFiles.Count - 1; k >= 0; k--)
+                    {
+
+
+
+                        string compare = Directory.GetParent(modFiles[k].ToString()).ToString();
+                        if (String.Equals(Path.GetFileName(compare), Path.GetFileName(originalFiles[i].ToString())))
                         {
 
-                            if (changed.Contains(CalculateMD5(ogDirectory[l]))){
-                                
-                            }
-                            else if(!String.Equals ( CalculateMD5(ogDirectory[l]),CalculateMD5(modDirectory[l]) ))
+                            string[] ogDirectory = listFilesRecursivly(originalFiles[i].ToString());
+                            string[] modDirectory = listFilesRecursivly(modFiles[k].ToString());
+
+
+                            for (int l = ogDirectory.Length - 1; l >= 0; l--)
                             {
-                                //Console.WriteLine("Not the same!: " + modDirectory[l]);
-                                //Console.WriteLine(CalculateMD5(ogDirectory[l]));
-                                //Console.WriteLine(CalculateMD5(modDirectory[l]));
-                                changed.Add(CalculateMD5(ogDirectory[l]));
-                                //Need to make this part work and were done
-                                File.Delete(ogDirectory[l]);
-                                File.Move(modDirectory[i], ogDirectory[l] );
                                 
+
+                                if (!changed.Contains(ogDirectory[l]) && !String.Equals(CalculateMD5(ogDirectory[l]), CalculateMD5(modDirectory[l])))
+                                {
+
+                                    
+                                    changed.Add(ogDirectory[l]);
+
+                                    File.Delete(ogDirectory[l]);
+                                    File.Move(modDirectory[l], ogDirectory[l], true);
+                                }
+                                
+                                
+                                //Console.WriteLine("Break dont work");
                             }
-                            //Console.WriteLine("Break dont work");
+
                         }
-                 
+                        // Console.WriteLine("Medium Loop");
                     }
-                   // Console.WriteLine("Medium Loop");
+                    // Console.WriteLine("Big Loop");
                 }
-               // Console.WriteLine("Big Loop");
+
+                */
+
+                Console.WriteLine("Select your packed file version (v1; v2; v2be; v3; v3be)");
+
+
+
+
+                String ver = Console.ReadLine();
+
+                Console.WriteLine(Path.GetFullPath(path));
+                for (int i = 0; i < originalFiles.Count; i++)
+                {
+
+                    StringBuilder command = new StringBuilder();
+                    command.Append("/K ");
+                    command.Append(addQoutes(addQoutes(Path.GetFullPath(path))) + " ");
+                    command.Append("pack ");
+                    command.Append(addQoutes(addQoutes(originalFiles[i].ToString())));
+                    //command.Append(" " + ver + " ");
+                    //command.Append(addQoutes(originalFiles[i].ToString()));
+
+                    Console.WriteLine(command.ToString());
+                    //String type = Path.GetFileName(Directory.GetParent(originalFiles[i].ToString()).ToString());
+                    Process.Start("CMD.exe", command.ToString());
+                    //Process.Start("CMD.exe", "/K" + addQoutes(addQoutes(Path.GetFullPath(path))) + " ");
+                }
+
+                Console.WriteLine("Done Merging!");
             }
-
-
-            Console.WriteLine("Select your packed file version (v1; v2; v2be; v3; v3be)");
-
-            String ver = Console.ReadLine();
-            for (int i = 0; i < originalFiles.Count; i++) {
-                String type = Path.GetFileName(Directory.GetParent(originalFiles[i].ToString()).ToString());
-                Process.Start("CMD.exe", "/K " + addQoutes(Path.GetFullPath(path)) + " pack " + originalFiles[i]+" "+ver+" "+originalFiles[i]+"."+type);
+            catch (Exception e)
+            {
+                Console.WriteLine("The process failed: {0}", e.ToString());
             }
-
-            Console.WriteLine("Done Merging!");
         }
 
         //Adds Quotes to A Given String (Good for Commands)
