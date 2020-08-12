@@ -55,12 +55,12 @@ namespace Bin_Merger
                 ArrayList changed = new ArrayList();
 
                 //Goes and iterates through the mod files and original files and compares checksums add those that are replaced to changed array for comparison
-                /*
-                for (int i = (originalFiles.Count - 1); i >= 0; i--)
+                
+                for (int i = 0;  originalFiles.Count> i ; i++)
                 {
 
                     Array ogFileArray = listFilesRecursivly(originalFiles[i].ToString());
-                    for (int k = modFiles.Count - 1; k >= 0; k--)
+                    for (int k = 0; modFiles.Count  > k; k++)
                     {
 
 
@@ -73,31 +73,24 @@ namespace Bin_Merger
                             string[] modDirectory = listFilesRecursivly(modFiles[k].ToString());
 
 
-                            for (int l = ogDirectory.Length - 1; l >= 0; l--)
+                            for (int l = 0; ogDirectory.Length >l; l++)
                             {
-                                
 
                                 if (!changed.Contains(ogDirectory[l]) && !String.Equals(CalculateMD5(ogDirectory[l]), CalculateMD5(modDirectory[l])))
-                                {
-
-                                    
+                                { 
                                     changed.Add(ogDirectory[l]);
-
                                     File.Delete(ogDirectory[l]);
                                     File.Move(modDirectory[l], ogDirectory[l], true);
                                 }
-                                
-                                
-                                //Console.WriteLine("Break dont work");
+
                             }
 
                         }
-                        // Console.WriteLine("Medium Loop");
+ 
                     }
-                    // Console.WriteLine("Big Loop");
                 }
 
-                */
+                
 
                 Console.WriteLine("Select your packed file version (v1; v2; v2be; v3; v3be)");
 
@@ -106,31 +99,28 @@ namespace Bin_Merger
 
                 String ver = Console.ReadLine();
 
-                Console.WriteLine(Path.GetFullPath(path));
+                //Console.WriteLine(Path.GetFullPath(path));
                 for (int i = 0; i < originalFiles.Count; i++)
                 {
-
-                    StringBuilder command = new StringBuilder();
-                    command.Append("/K ");
-                    command.Append(addQoutes(addQoutes(Path.GetFullPath(path))) + " ");
-                    command.Append("pack ");
-                    command.Append(addQoutes(addQoutes(originalFiles[i].ToString())));
-                    //command.Append(" " + ver + " ");
-                    //command.Append(addQoutes(originalFiles[i].ToString()));
-
-                    Console.WriteLine(command.ToString());
-                    //String type = Path.GetFileName(Directory.GetParent(originalFiles[i].ToString()).ToString());
-                    Process.Start("CMD.exe", command.ToString());
-                    //Process.Start("CMD.exe", "/K" + addQoutes(addQoutes(Path.GetFullPath(path))) + " ");
+                    PackFolder(Path.GetFullPath(originalFiles[i].ToString()), (originalFiles[i].ToString()).ToString() + "." + Path.GetFileName(Directory.GetParent(originalFiles[i].ToString()).ToString()).ToLower() , ver , Path.GetFullPath(path));
                 }
 
                 Console.WriteLine("Done Merging!");
+                Console.ReadLine();
             }
             catch (Exception e)
             {
                 Console.WriteLine("The process failed: {0}", e.ToString());
             }
         }
+
+        //Adds a grave to A Given String
+        static string addGrave(string input)
+        {
+            return "`" + input + "`";
+        }
+
+
 
         //Adds Quotes to A Given String (Good for Commands)
         static string addQoutes(string input)
@@ -209,7 +199,18 @@ namespace Bin_Merger
         }
 
 
+        static void PackFolder(string folderDir, string outputFile,string ver, string path)
+        {
+            ProcessStartInfo pakPack = new ProcessStartInfo();
+            pakPack.FileName = path;
 
+            pakPack.Arguments = $@"pack ""{folderDir}"" {ver} ""{outputFile}""";
+
+            Console.WriteLine("PAKPack packing...");
+            Process.Start(pakPack).WaitForExit();
+
+            Process.Start(pakPack).WaitForExit();
+        }
 
     }
 
